@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MO𓅓 Text Combinator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Vazir', sans-serif; background-color: #f3f4f6; }
+        .minimal-area { 
+            border: 1px solid #e5e7eb; 
+            transition: all 0.3s ease; 
+            resize: none;
+        }
+        .minimal-area:focus { 
+            border-color: #000; 
+            outline: none; 
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .btn-animate { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-animate:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .btn-animate:active { transform: translateY(0) scale(0.98); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 text-gray-900">
+
+    <div class="fixed top-6 left-6 z-50">
+        <a href="https://momalekiii.github.io/" 
+           class="flex items-center gap-2 text-sm text-gray-500 hover:text-black btn-animate bg-white py-2.5 px-5 rounded-full shadow-sm border border-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>بازگشت</span>
+        </a>
+    </div>
+
+    <div class="w-full max-w-4xl mt-16 mb-10">
+        <h1 class="text-5xl font-black text-center mb-10 tracking-tighter text-gray-900">MO𓅓</h1>
+
+        <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-gray-50">
+            <h2 class="text-2xl font-bold mb-10 text-center text-gray-800">ترکیب‌گر متن</h2>
+            
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <button onclick="swapLists()" title="تعویض لیست‌ها"
+                        class="hidden md:flex absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 p-3 rounded-full shadow-lg hover:border-black transition-all active:scale-90">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                </button>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center px-2">
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">لیست A</label>
+                        <span id="count1" class="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">0 خط</span>
+                    </div>
+                    <textarea id="list1" oninput="updateCounts()" placeholder="مثلاً: قرم&#10;آبی" 
+                              class="minimal-area w-full h-48 p-5 rounded-[1.5rem] bg-gray-50/50 text-sm leading-relaxed"></textarea>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center px-2">
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">لیست B</label>
+                        <span id="count2" class="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">0 خط</span>
+                    </div>
+                    <textarea id="list2" oninput="updateCounts()" placeholder="مثلاً: ماشین&#10;موتور" 
+                              class="minimal-area w-full h-48 p-5 rounded-[1.5rem] bg-gray-50/50 text-sm leading-relaxed"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10 p-6 bg-gray-50 rounded-[2rem]">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-gray-500">جداکننده:</span>
+                    <input type="text" id="separator" value=" " 
+                           class="w-20 p-2 text-center border border-gray-200 rounded-xl text-sm focus:border-black outline-none bg-white">
+                </div>
+                <div class="h-4 w-[1px] bg-gray-300 hidden sm:block"></div>
+                <div class="text-xs text-gray-400" id="total-info">آماده برای ترکیب...</div>
+            </div>
+
+            <button onclick="combineTexts()" 
+                    class="w-full bg-black text-white py-5 rounded-2xl font-bold text-lg btn-animate hover:bg-zinc-800 shadow-xl mb-10">
+                شروع ترکیب (Combine)
+            </button>
+
+            <div id="result-container" class="hidden space-y-4 pt-8 border-t border-gray-100">
+                <div class="flex justify-between items-center px-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">خروجی نهایی</label>
+                    <button onclick="downloadResult()" class="text-[10px] text-blue-500 hover:underline">دانلود فایل .txt</button>
+                </div>
+                <textarea id="result" readonly 
+                          class="minimal-area w-full h-64 p-6 rounded-[2rem] bg-zinc-900 text-zinc-300 text-sm leading-relaxed border-none"></textarea>
+                
+                <button id="copy-btn" onclick="copyToClipboard()" 
+                        class="flex items-center justify-center gap-2 w-full py-4 bg-blue-600 text-white rounded-2xl text-sm font-bold btn-animate shadow-lg">
+                    کپی کردن همه
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateCounts() {
+            const l1 = document.getElementById('list1').value.split('\n').filter(l => l.trim()).length;
+            const l2 = document.getElementById('list2').value.split('\n').filter(l => l.trim()).length;
+            document.getElementById('count1').innerText = l1 + " خط";
+            document.getElementById('count2').innerText = l2 + " خط";
+            document.getElementById('total-info').innerText = `تعداد کل احتمالات: ${l1 * l2}`;
+        }
+
+        function swapLists() {
+            const list1 = document.getElementById('list1');
+            const list2 = document.getElementById('list2');
+            const temp = list1.value;
+            list1.value = list2.value;
+            list2.value = temp;
+            updateCounts();
+        }
+
+        function combineTexts() {
+            const list1 = document.getElementById('list1').value.split('\n').filter(line => line.trim() !== "");
+            const list2 = document.getElementById('list2').value.split('\n').filter(line => line.trim() !== "");
+            const sep = document.getElementById('separator').value;
+            const resultArea = document.getElementById('result');
+            const container = document.getElementById('result-container');
+
+            if (list1.length === 0 || list2.length === 0) {
+                alert("لطفاً هر دو لیست را پر کنید.");
+                return;
+            }
+
+            let combinations = [];
+            for (let item1 of list1) {
+                for (let item2 of list2) {
+                    combinations.push(item1.trim() + sep + item2.trim());
+                }
+            }
+
+            resultArea.value = combinations.join('\n');
+            container.classList.remove('hidden');
+            resultArea.parentElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const result = document.getElementById('result');
+            result.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copy-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "کپی شد! ✓";
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.replace('bg-green-600', 'bg-blue-600');
+            }, 2000);
+        }
+
+        function downloadResult() {
+            const text = document.getElementById('result').value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = "combined-text-mo.txt";
+            anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+            anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
+            anchor.click();
+        }
+    </script>
+</body>
+</html>
